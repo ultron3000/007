@@ -34,6 +34,7 @@
       background-color: #0077cc;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
   <h1>Dr. No (1962)</h1>
@@ -44,14 +45,19 @@
 
   <script>
     const video = document.getElementById('video');
-    const videoSrc = "https://sxic.madrigalcajig.sbs:443/v4/ox/itaov/index-f1-v1-a1.txt";
+    const videoSrc = "https://sxic.madrigalcajig.sbs:443/v4/ox/itaov/index-f1-v1-a1.txt"; // The HLS stream link
 
+    // Check if HLS.js is supported (for browsers that do not support HLS natively, like Chrome)
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(videoSrc);
       hls.attachMedia(video);
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    }
+    // For browsers that support HLS natively (like Safari)
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = videoSrc;
+    } else {
+      console.error("Your browser does not support HLS streaming.");
     }
   </script>
 </body>
