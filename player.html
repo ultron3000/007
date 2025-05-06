@@ -1,87 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>James Bond Player</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Playing Movie</title>
   <style>
     body {
       background-color: #000;
-      color: #fff;
-      text-align: center;
-      font-family: sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
-    h1 {
-      color: #ffcc00;
+    #backBtn {
+      background: #444;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
     }
-    video {
-      width: 90%;
-      max-width: 1000px;
-      border: 3px solid #ffcc00;
-      border-radius: 15px;
-      background: black;
+    #backBtn:hover {
+      background: #666;
     }
-    a {
-      display: inline-block;
-      margin-top: 20px;
-      color: #ffcc00;
-      font-size: 18px;
-      text-decoration: none;
-      font-weight: bold;
+    iframe, video {
+      width: 100%;
+      height: 100%;
+      border: none;
+      flex: 1;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
+  <div id="backBtn" onclick="window.history.back()">← Back to Movies</div>
+  <div id="playerContainer"></div>
 
-<h1 id="title">Loading...</h1>
-<video id="video" controls autoplay></video>
-<br>
-<a href="index.html">← Back to All Movies</a>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoUrl = urlParams.get("url");
 
-<script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const videoUrl = urlParams.get('url');
-  const title = decodeURIComponent(urlParams.get('title') || 'James Bond');
-  const video = document.getElementById('video');
-  document.getElementById('title').textContent = title;
-
-  function loadTxtAndPlay(txtUrl) {
-    fetch(txtUrl)
-      .then(res => res.text())
-      .then(text => {
-        const links = text.trim().split('\n').filter(l => l.trim());
-        if (links.length === 0) throw new Error("No links found");
-        playVideo(links[0]);
-      })
-      .catch(err => alert("Failed to load .txt: " + err.message));
-  }
-
-  function playVideo(src) {
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(src);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = src;
-      video.addEventListener('loadedmetadata', () => video.play());
-    } else {
-      video.src = src;
-      video.play();
+    function isM3U8(url) {
+      return url.includes(".m3u8");
     }
-  }
 
-  if (!videoUrl) {
-    alert("No video URL specified.");
-  } else if (videoUrl.endsWith(".txt")) {
-    loadTxtAndPlay(videoUrl);
-  } else {
-    playVideo(videoUrl);
-  }
-</script>
+    function isMP4(url) {
+      return url.includes(".mp4");
+    }
 
+    function isTXT(url) {
+      return url.includes(".txt");
+    }
+
+    async function fetchFromTxt(txtUrl) {
+      const response = await fetch(txtUrl);
+      const content = await response.text();
+      const lines = content.split("\n");
+      const lastLine = lines.reverse().find(line => line.includes(".m3u8") || line.includes(".mp4"));
+      return lastLine || null;
+    }
+
+    async function loadVideo() {
+      if (!videoUrl) return;
+
+      let finalUrl = videoUrl;
+
+      if (isTXT(videoUrl)) {
+        finalUrl = await fetchFromTxt(videoUrl);
+      }
+
+      if (!finalUrl) {
+        document.body.innerHTML = "<h2 style='color:white;text-align:center'>Video not found.</h2>";
+        return;
+      }
+
+      const videoElement = document.createElement("video");
+      videoElement.src = finalUrl;
+      videoElement.controls = true;
+      videoElement.autoplay = true;
+
+      if (isM3U8(finalUrl)) {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+        script.onload = () => {
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(finalUrl);
+            hls.attachMedia(videoElement);
+          } else if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
+            videoElement.src = finalUrl;
+          }
+        };
+        document.body.appendChild(script);
+      }
+
+      document.getElementById("playerContainer").appendChild(videoElement);
+    }
+
+    loadVideo();
+  </script>
 </body>
 </html>
