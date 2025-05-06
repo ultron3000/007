@@ -1,66 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>James Bond Movie Player</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>007 Movie Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body {
-      margin: 0;
       background-color: black;
-      color: white;
+      color: #fff;
+      margin: 0;
+      padding: 0;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
     }
     video {
       width: 100%;
-      max-width: 1000px;
-      height: auto;
-      background-color: black;
+      max-width: 960px;
+      border: 5px solid #0077cc;
+      border-radius: 10px;
+      background: #000;
     }
   </style>
 </head>
 <body>
-  <video id="video" controls autoplay></video>
+  <video id="video" controls autoplay crossorigin="anonymous"></video>
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-    const video = document.getElementById('video');
-    const urlParams = new URLSearchParams(window.location.search);
-    const url = urlParams.get('url');
+    async function loadAndPlay(url) {
+      const video = document.getElementById('video');
 
-    if (!url) {
-      alert('No video URL provided.');
-    } else if (url.endsWith('.txt')) {
-      fetch(url)
-        .then(response => response.text())
-        .then(playlist => {
-          const lines = playlist.split('\n').map(line => line.trim()).filter(Boolean);
-          const firstPlayable = lines.find(line =>
-            line.endsWith('.m3u8') || line.endsWith('.mp4')
-          );
-          if (firstPlayable) {
-            playVideo(firstPlayable);
-          } else {
-            alert('No playable video found in .txt file.');
+      // Handle .txt links by fetching the real video URL inside
+      if (url.endsWith('.txt')) {
+        try {
+          const response = await fetch(url);
+          url = (await response.text()).trim();
+        } catch (err) {
+          alert("Failed to load .txt link: " + err.message);
+          return;
+        }
+      }
+
+      // Reset previous video
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+
+      if (Hls.isSupported() && url.endsWith('.m3u8')) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
+        hls.on(Hls.Events.ERROR, function (event, data) {
+          if (data.fatal) {
+            alert("HLS playback error: " + data.details);
           }
-        })
-        .catch(err => alert('Failed to load playlist: ' + err));
-    } else {
-      playVideo(url);
+        });
+      } else {
+        video.src = url;
+        video.addEventListener('loadedmetadata', () => video.play());
+      }
     }
 
-    function playVideo(src) {
-      if (src.endsWith('.m3u8') && Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(src);
-        hls.attachMedia(video);
-      } else {
-        video.src = src;
-      }
+    const urlParams = new URLSearchParams(window.location.search);
+    const streamUrl = urlParams.get('url');
+    if (streamUrl) {
+      loadAndPlay(streamUrl);
+    } else {
+      alert("No URL provided. Use player.html?url=...");
     }
   </script>
 </body>
