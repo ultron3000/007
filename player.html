@@ -1,67 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Watch Movie</title>
+  <meta charset="UTF-8">
+  <title>James Bond Movie Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
-      background-color: #000;
+      background-color: black;
       color: white;
-      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       height: 100vh;
     }
-    h1 {
-      text-align: center;
-      padding: 10px;
-      font-size: 18px;
-    }
-    iframe, video {
+    video {
       width: 100%;
       max-width: 1000px;
-      height: 85vh;
+      height: auto;
+      background-color: black;
     }
   </style>
 </head>
 <body>
-  <h1 id="movieTitle">Loading...</h1>
-  <div id="playerContainer"></div>
+  <video id="video" controls autoplay></video>
 
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const title = params.get("title");
-    const videoUrl = params.get("video");
-    document.getElementById("movieTitle").textContent = title;
+    const video = document.getElementById('video');
+    const urlParams = new URLSearchParams(window.location.search);
+    const url = urlParams.get('url');
 
-    function isTxt(url) {
-      return url.endsWith(".txt");
-    }
-
-    function createPlayer(url) {
-      const container = document.getElementById("playerContainer");
-      if (isTxt(url)) {
-        const iframe = document.createElement("iframe");
-        iframe.src = url;
-        iframe.allowFullscreen = true;
-        iframe.frameBorder = "0";
-        container.appendChild(iframe);
-      } else {
-        const video = document.createElement("video");
-        video.src = url;
-        video.controls = true;
-        video.autoplay = true;
-        container.appendChild(video);
-      }
-    }
-
-    if (videoUrl) {
-      createPlayer(videoUrl);
+    if (!url) {
+      alert('No video URL provided.');
+    } else if (url.endsWith('.txt')) {
+      fetch(url)
+        .then(response => response.text())
+        .then(playlist => {
+          const lines = playlist.split('\n').map(line => line.trim()).filter(Boolean);
+          const firstPlayable = lines.find(line =>
+            line.endsWith('.m3u8') || line.endsWith('.mp4')
+          );
+          if (firstPlayable) {
+            playVideo(firstPlayable);
+          } else {
+            alert('No playable video found in .txt file.');
+          }
+        })
+        .catch(err => alert('Failed to load playlist: ' + err));
     } else {
-      document.getElementById("movieTitle").textContent = "Invalid video URL.";
+      playVideo(url);
+    }
+
+    function playVideo(src) {
+      if (src.endsWith('.m3u8') && Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+      } else {
+        video.src = src;
+      }
     }
   </script>
 </body>
