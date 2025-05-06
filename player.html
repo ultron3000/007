@@ -1,78 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>007 Movie Player</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <meta charset="UTF-8">
+  <title>James Bond Movie Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      background-color: black;
-      color: #fff;
+      background: black;
+      color: #ffcc00;
+      font-family: Arial, sans-serif;
+      text-align: center;
       margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2em;
     }
     video {
-      width: 100%;
-      max-width: 960px;
-      border: 5px solid #0077cc;
-      border-radius: 10px;
+      width: 90%;
+      max-width: 1000px;
+      border: 3px solid #ffcc00;
+      border-radius: 15px;
       background: #000;
     }
+    #loading-spinner {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 60px;
+      height: 60px;
+      margin: -30px 0 0 -30px;
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #ffcc00;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 999;
+    }
+    #loading-text {
+      display: none;
+      position: fixed;
+      top: 60%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .caption-button {
+      margin-top: 10px;
+      background: #ffcc00;
+      color: black;
+      border: none;
+      padding: 8px 16px;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #ffcc00;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 1.2em;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
-  <video id="video" controls autoplay crossorigin="anonymous"></video>
 
-  <script>
-    async function loadAndPlay(url) {
-      const video = document.getElementById('video');
+<div id="loading-spinner"></div>
+<div id="loading-text">Loading movie...</div>
 
-      // Handle .txt links by fetching the real video URL inside
-      if (url.endsWith('.txt')) {
-        try {
-          const response = await fetch(url);
-          url = (await response.text()).trim();
-        } catch (err) {
-          alert("Failed to load .txt link: " + err.message);
-          return;
-        }
+<h1 id="movie-title">Loading...</h1>
+
+<video id="video" controls autoplay crossorigin="anonymous"></video>
+
+<br>
+<button class="caption-button" id="toggle-captions">Toggle Subtitles</button>
+<br><br>
+
+<a href="index.html">← Back to Movies</a>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const title = params.get('title') || 'James Bond';
+const videoUrl = params.get('url');
+const subtitleUrl = params.get('subtitle');
+const video = document.getElementById('video');
+const movieTitle = document.getElementById('movie-title');
+const spinner = document.getElementById('loading-spinner');
+const loadingText = document.getElementById('loading-text');
+const toggleBtn = document.getElementById('toggle-captions');
+const saveKey = `007-continue-${title}`;
+
+movieTitle.textContent = decodeURIComponent(title);
+showSpinner();
+
+function showSpinner() {
+  spinner.style.display = "block";
+  loadingText.style.display = "block";
+}
+function hideSpinner() {
+  spinner.style.display = "none";
+  loadingText.style.display = "none";
+}
+
+function loadTxtFileAndPlay(txtUrl) {
+  fetch(txtUrl)
+    .then(response => response.text())
+    .then(text => {
+      const lines = text.trim().split('\n').filter(line => line.trim() !== '');
+      if (lines.length === 0) throw new Error("No playable video links in the .txt file.");
+      playVideo(lines[0]);
+    })
+    .catch(err => {
+      alert("Failed to load .txt video links: " + err.message);
+      hideSpinner();
+    });
+}
+
+function playVideo(url) {
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      video.play();
+      hideSpinner();
+      const lastTime = localStorage.getItem(saveKey);
+      if (lastTime) video.currentTime = parseFloat(lastTime);
+    });
+    hls.on(Hls.Events.ERROR, function (event, data) {
+      if (data.fatal) {
+        alert("A fatal playback error occurred: " + data.details);
       }
+    });
+  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = url;
+    video.addEventListener("loadedmetadata", () => {
+      video.play();
+      hideSpinner();
+      const lastTime = localStorage.getItem(saveKey);
+      if (lastTime) video.currentTime = parseFloat(lastTime);
+    });
+  } else {
+    video.src = url;
+    video.play().then(hideSpinner).catch(err => {
+      alert("Playback failed: " + err.message);
+    });
+  }
+}
 
-      // Reset previous video
-      video.pause();
-      video.removeAttribute('src');
-      video.load();
+// Decide how to handle the video URL
+if (videoUrl.endsWith(".txt")) {
+  loadTxtFileAndPlay(videoUrl);
+} else {
+  playVideo(videoUrl);
+}
 
-      if (Hls.isSupported() && url.endsWith('.m3u8')) {
-        const hls = new Hls();
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-          video.play();
-        });
-        hls.on(Hls.Events.ERROR, function (event, data) {
-          if (data.fatal) {
-            alert("HLS playback error: " + data.details);
-          }
-        });
-      } else {
-        video.src = url;
-        video.addEventListener('loadedmetadata', () => video.play());
-      }
-    }
+// Load subtitles if provided
+if (subtitleUrl) {
+  const track = document.createElement('track');
+  track.kind = 'subtitles';
+  track.label = 'English';
+  track.srclang = 'en';
+  track.src = subtitleUrl;
+  track.default = true;
+  video.appendChild(track);
+}
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const streamUrl = urlParams.get('url');
-    if (streamUrl) {
-      loadAndPlay(streamUrl);
-    } else {
-      alert("No URL provided. Use player.html?url=...");
-    }
-  </script>
+// Save playback progress
+setInterval(() => {
+  if (!isNaN(video.currentTime)) {
+    localStorage.setItem(saveKey, video.currentTime);
+  }
+}, 5000);
+
+window.addEventListener("beforeunload", () => {
+  if (!isNaN(video.currentTime)) {
+    localStorage.setItem(saveKey, video.currentTime);
+  }
+});
+
+// Toggle subtitles
+toggleBtn.addEventListener("click", () => {
+  for (const track of video.textTracks) {
+    track.mode = track.mode === "showing" ? "hidden" : "showing";
+  }
+});
+
+// Keyboard controls
+document.addEventListener("keydown", (e) => {
+  if (e.code === "ArrowRight") video.currentTime += 10;
+  else if (e.code === "ArrowLeft") video.currentTime -= 10;
+  else if (e.code === "Space") {
+    e.preventDefault();
+    video.paused ? video.play() : video.pause();
+  }
+});
+</script>
+
 </body>
 </html>
