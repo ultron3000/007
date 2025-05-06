@@ -1,58 +1,67 @@
-<!-- player.html for 007 Movie Playback -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>007 Movie Player</title>
+  <title>Watch Movie</title>
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
       background-color: #000;
-      color: #fff;
+      color: white;
       font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
     }
     h1 {
       text-align: center;
-      margin: 10px 0;
-      font-size: 20px;
+      padding: 10px;
+      font-size: 18px;
     }
-    iframe {
-      display: block;
-      border: none;
+    iframe, video {
       width: 100%;
-      height: calc(100% - 40px);
+      max-width: 1000px;
+      height: 85vh;
     }
   </style>
 </head>
 <body>
-  <h1 id="title">Loading...</h1>
-  <iframe id="proxy" allowfullscreen></iframe>
+  <h1 id="movieTitle">Loading...</h1>
+  <div id="playerContainer"></div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const title = urlParams.get('title') || '007 Movie Player';
-    const videoUrl = urlParams.get('video');
+    const params = new URLSearchParams(window.location.search);
+    const title = params.get("title");
+    const videoUrl = params.get("video");
+    document.getElementById("movieTitle").textContent = title;
 
-    document.getElementById('title').innerText = decodeURIComponent(title);
+    function isTxt(url) {
+      return url.endsWith(".txt");
+    }
+
+    function createPlayer(url) {
+      const container = document.getElementById("playerContainer");
+      if (isTxt(url)) {
+        const iframe = document.createElement("iframe");
+        iframe.src = url;
+        iframe.allowFullscreen = true;
+        iframe.frameBorder = "0";
+        container.appendChild(iframe);
+      } else {
+        const video = document.createElement("video");
+        video.src = url;
+        video.controls = true;
+        video.autoplay = true;
+        container.appendChild(video);
+      }
+    }
 
     if (videoUrl) {
-      const decoded = decodeURIComponent(videoUrl);
-      const ext = decoded.split('.').pop();
-
-      if (ext === 'txt') {
-        fetch(decoded)
-          .then(res => res.text())
-          .then(url => {
-            document.getElementById('proxy').src = url.trim();
-          });
-      } else {
-        document.getElementById('proxy').src = decoded;
-      }
+      createPlayer(videoUrl);
     } else {
-      document.getElementById('proxy').outerHTML = '<p style="text-align:center;">No video URL provided.</p>';
+      document.getElementById("movieTitle").textContent = "Invalid video URL.";
     }
   </script>
 </body>
