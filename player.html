@@ -1,65 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Watch James Bond</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playing James Bond Movie</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body {
+      background: #000;
       margin: 0;
-      background-color: black;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      text-align: center;
+      font-size: 18px;
+      padding: 10px;
+      background: #111;
+      margin: 0;
     }
     video {
-      width: 100vw;
-      height: 100vh;
-      background: black;
+      width: 100%;
+      height: 100%;
+      background: #000;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
+  <h1 id="movietitle">Loading...</h1>
   <video id="video" controls autoplay></video>
+
   <script>
-    const movieMap = {
-      "Dr. No": "https://sxic.madrigalcajig.sbs:443/v4/ox/itaov/index-f1-v1-a1.txt",
-      "From Russia with Love": "https://scvo.sperlinglayma.sbs:443/v4/xq/bnb5s/index-f2-v1-a1.txt",
-      "Goldfinger": "https://sr81.griseldakro.sbs:443/v4/xq/vluy1/index-f2-v1-a1.txt",
-      "Thunderball": "https://acu5tifykrnh.cdn-centaurus.com/hls2/01/03632/qdhjo0tjjkxt_n/master.m3u8?t=cDy4...",
-      "You Only Live Twice": "https://lu1r85hg8m.cdn-centaurus.com/hls2/01/03827/pmwas2v2vma0_n/master.m3u8?t=qeZQx2...",
-      "On Her Majesty's Secret Service": "https://p2qxmiasglj.cdn-centaurus.com:443/hls2/01/08488/6nekr36wy0q7_,l,n,h,.urlset/index-f3-v1-a1.m3u8?t=b66Hwj...",
-      "Diamonds Are Forever": "https://vwyn3lxe5fv5.cdn-centaurus.com/hls2/01/00508/aurszn0kpooo_h/master.m3u8?t=K8INC...",
-      "Live and Let Die": "https://s3ae.shahcanna.sbs/v4/ox/vssl9/cf-master.txt?v=1734145381",
-      "The Man with the Golden Gun": "https://g9hb6ahmf6ejy.cdn-centaurus.com/hls2/01/04215/g7025unsinyz_,n,h,.urlset/master.m3u8?t=7uoEM0...",
-      "The Spy Who Loved Me": "https://JdeVcHPXBGC6.cdn-centaurus.com/hls2/01/03845/cl01ghdyenul_n/master.m3u8?t=pdEIx...",
-      "Moonraker": "https://g4vsrqvtrj.cdn-centaurus.com/hls2/01/04468/o39dsqawmqqc_n/master.m3u8?t=oUu1loDU...",
-      "For Your Eyes Only": "https://p5qxmilmdj.cdn-centaurus.com/hls2/01/04561/nxusrmgllmgn_n/master.m3u8?t=DsDTh...",
-      "Octopussy": "https://r63hfpdmodtc.cdn-centaurus.com/hls2/01/04160/4lbgamji3vfa_n/master.m3u8?t=Uzl9q...",
-      "A View to a Kill": "https://uo0v8yotr48r.cdn-centaurus.com/hls2/01/04760/9l6jyssybmip_l/master.m3u8?t=mhR0e...",
-      "The Living Daylights": "https://ju928o2pa00e6.cdn-centaurus.com/hls2/01/04760/sji0kivsqa7y_l/master.m3u8?t=jktQ2...",
-      "Licence to Kill": "https://cwfuommwagyrfcg6.cdn-centaurus.com/hls2/01/04160/6sxeue09eh0j_n/master.m3u8?t=VUvgf...",
-      "GoldenEye": "https://s3ae.killionorellanacoelho.sbs/v4/61/56psf/index-f1-v1-a1.txt",
-      "Tomorrow Never Dies": "https://zq62mmaomhqa.cdn-centaurus.com/hls2/01/02205/92l1ncfmga3p_n/master.m3u8?t=2Z5wL...",
-      "The World Is Not Enough": "https://j5di6rz38z.cdn-centaurus.com/hls2/01/02080/grjsnp7kyzhc_n/master.m3u8?t=65nIVr...",
-      "Die Another Day": "https://sr81.wrendresslerle.sbs/v4/ho/5x9ce/cf-master.txt?v=1731010518",
-      "Casino Royale": "https://kFo8mkCe0fzdHLq.cdn-centaurus.com/hls2/01/00502/ypj8yk97u15i_h/master.m3u8?t=0bRf...",
-      "Quantum of Solace": "https://s3ae.alenapark.sbs:443/v4/ox/xqia6/index-f2-v1-a1.txt",
-      "Skyfall": "https://ye0r0rrinu.cdn-centaurus.com/hls2/01/00500/wkfkwyaqjsnl_h/master.m3u8?t=D0yzEC...",
-      "No Time to Die": "https://zHIOihhF5JP4Tuz.cdn-centaurus.com/hls2/01/00527/89omo2kifvdp_h/master.m3u8?t=v7kp..."
-    };
-
     const urlParams = new URLSearchParams(window.location.search);
-    const title = urlParams.get('title');
-    const videoUrl = movieMap[title];
+    const videoUrl = urlParams.get("url");
+    const title = urlParams.get("title");
 
-    const video = document.getElementById('video');
+    document.getElementById("movietitle").textContent = title || "Now Playing";
 
-    if (Hls.isSupported() && videoUrl) {
-      const hls = new Hls();
-      hls.loadSource(videoUrl);
-      hls.attachMedia(video);
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = videoUrl;
+    const video = document.getElementById("video");
+
+    function playVideo(src) {
+      if (src.endsWith(".m3u8")) {
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(src);
+          hls.attachMedia(video);
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = src;
+        }
+      } else {
+        video.src = src;
+      }
+    }
+
+    if (videoUrl.endsWith(".txt")) {
+      fetch(videoUrl)
+        .then(res => res.text())
+        .then(text => {
+          const m3u8Url = text.trim();
+          playVideo(m3u8Url);
+        })
+        .catch(err => {
+          alert("Failed to load video: " + err);
+        });
     } else {
-      alert("Your browser does not support HLS playback.");
+      playVideo(videoUrl);
     }
   </script>
 </body>
