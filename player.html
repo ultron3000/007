@@ -1,74 +1,58 @@
+<!-- player.html for 007 Movie Playback -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Playing James Bond Movie</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>007 Movie Player</title>
   <style>
-    body {
-      background: #000;
+    html, body {
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      height: 100%;
+      background-color: #000;
       color: #fff;
       font-family: Arial, sans-serif;
     }
     h1 {
       text-align: center;
-      font-size: 18px;
-      padding: 10px;
-      background: #111;
-      margin: 0;
+      margin: 10px 0;
+      font-size: 20px;
     }
-    video {
+    iframe {
+      display: block;
+      border: none;
       width: 100%;
-      height: 100%;
-      background: #000;
+      height: calc(100% - 40px);
     }
   </style>
 </head>
 <body>
-  <h1 id="movietitle">Loading...</h1>
-  <video id="video" controls autoplay></video>
+  <h1 id="title">Loading...</h1>
+  <iframe id="proxy" allowfullscreen></iframe>
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const videoUrl = urlParams.get("url");
-    const title = urlParams.get("title");
+    const title = urlParams.get('title') || '007 Movie Player';
+    const videoUrl = urlParams.get('video');
 
-    document.getElementById("movietitle").textContent = title || "Now Playing";
+    document.getElementById('title').innerText = decodeURIComponent(title);
 
-    const video = document.getElementById("video");
+    if (videoUrl) {
+      const decoded = decodeURIComponent(videoUrl);
+      const ext = decoded.split('.').pop();
 
-    function playVideo(src) {
-      if (src.endsWith(".m3u8")) {
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(src);
-          hls.attachMedia(video);
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          video.src = src;
-        }
+      if (ext === 'txt') {
+        fetch(decoded)
+          .then(res => res.text())
+          .then(url => {
+            document.getElementById('proxy').src = url.trim();
+          });
       } else {
-        video.src = src;
+        document.getElementById('proxy').src = decoded;
       }
-    }
-
-    if (videoUrl.endsWith(".txt")) {
-      fetch(videoUrl)
-        .then(res => res.text())
-        .then(text => {
-          const m3u8Url = text.trim();
-          playVideo(m3u8Url);
-        })
-        .catch(err => {
-          alert("Failed to load video: " + err);
-        });
     } else {
-      playVideo(videoUrl);
+      document.getElementById('proxy').outerHTML = '<p style="text-align:center;">No video URL provided.</p>';
     }
   </script>
 </body>
