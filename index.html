@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>James Bond Movie Universe</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>James Bond 007 Collection</title>
   <style>
     body {
-      background-color: black;
-      color: white;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
       margin: 0;
       padding: 20px;
     }
@@ -17,71 +18,134 @@
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 15px;
     }
     .movie {
+      background-color: #111;
+      border-radius: 8px;
+      overflow: hidden;
       text-align: center;
-      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .movie:hover {
+      transform: scale(1.05);
     }
     .movie img {
       width: 100%;
-      border-radius: 10px;
-      transition: transform 0.3s;
+      height: 240px;
+      object-fit: cover;
+      display: block;
     }
-    .movie:hover img {
-      transform: scale(1.05);
-    }
-    .movie-title {
-      margin-top: 10px;
-      font-size: 16px;
+    .title {
+      padding: 10px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <h1>James Bond Movie Universe</h1>
+  <h1>James Bond 007 Collection</h1>
   <div class="grid">
-    <!-- BEGIN BOND MOVIES -->
-    <script>
-      const movies = [
-        { title: "Dr. No", link: "player.html?title=Dr. No", img: "https://upload.wikimedia.org/wikipedia/en/4/4c/Dr._No_-_UK_cinema_poster.jpg" },
-        { title: "From Russia with Love", link: "player.html?title=From Russia with Love", img: "https://upload.wikimedia.org/wikipedia/en/3/33/From_Russia_with_Love_poster.jpg" },
-        { title: "Goldfinger", link: "player.html?title=Goldfinger", img: "https://upload.wikimedia.org/wikipedia/en/8/8e/Goldfinger_%281964_film%29_poster.jpg" },
-        { title: "Thunderball", link: "player.html?title=Thunderball", img: "https://upload.wikimedia.org/wikipedia/en/2/2e/Thunderball_-_UK_cinema_poster.jpg" },
-        { title: "You Only Live Twice", link: "player.html?title=You Only Live Twice", img: "https://upload.wikimedia.org/wikipedia/en/8/85/You_Only_Live_Twice_-_UK_cinema_poster.jpg" },
-        { title: "On Her Majesty's Secret Service", link: "player.html?title=On Her Majesty's Secret Service", img: "https://upload.wikimedia.org/wikipedia/en/1/1e/On_Her_Majesty%27s_Secret_Service_poster.jpg" },
-        { title: "Diamonds Are Forever", link: "player.html?title=Diamonds Are Forever", img: "https://upload.wikimedia.org/wikipedia/en/7/79/Diamonds_Are_Forever_-_UK_cinema_poster.jpg" },
-        { title: "Live and Let Die", link: "player.html?title=Live and Let Die", img: "https://upload.wikimedia.org/wikipedia/en/3/30/Live_and_Let_Die_-_UK_cinema_poster.jpg" },
-        { title: "The Man with the Golden Gun", link: "player.html?title=The Man with the Golden Gun", img: "https://upload.wikimedia.org/wikipedia/en/4/4b/The_Man_with_the_Golden_Gun_-_UK_cinema_poster.jpg" },
-        { title: "The Spy Who Loved Me", link: "player.html?title=The Spy Who Loved Me", img: "https://upload.wikimedia.org/wikipedia/en/5/5d/The_Spy_Who_Loved_Me_%281977_film%29_-_UK_cinema_poster.jpg" },
-        { title: "Moonraker", link: "player.html?title=Moonraker", img: "https://upload.wikimedia.org/wikipedia/en/d/d1/Moonraker_%281979_film%29_-_UK_cinema_poster.jpg" },
-        { title: "For Your Eyes Only", link: "player.html?title=For Your Eyes Only", img: "https://upload.wikimedia.org/wikipedia/en/5/5a/For_Your_Eyes_Only_-_UK_cinema_poster.jpg" },
-        { title: "Octopussy", link: "player.html?title=Octopussy", img: "https://upload.wikimedia.org/wikipedia/en/0/0d/Octopussy_-_UK_cinema_poster.jpg" },
-        { title: "A View to a Kill", link: "player.html?title=A View to a Kill", img: "https://upload.wikimedia.org/wikipedia/en/6/61/A_View_to_a_Kill_-_UK_cinema_poster.jpg" },
-        { title: "The Living Daylights", link: "player.html?title=The Living Daylights", img: "https://upload.wikimedia.org/wikipedia/en/5/5b/The_Living_Daylights_-_UK_cinema_poster.jpg" },
-        { title: "Licence to Kill", link: "player.html?title=Licence to Kill", img: "https://upload.wikimedia.org/wikipedia/en/d/d9/Licence_to_Kill_-_UK_cinema_poster.jpg" },
-        { title: "GoldenEye", link: "player.html?title=GoldenEye", img: "https://upload.wikimedia.org/wikipedia/en/5/5f/GoldenEye_-_UK_cinema_poster.jpg" },
-        { title: "Tomorrow Never Dies", link: "player.html?title=Tomorrow Never Dies", img: "https://upload.wikimedia.org/wikipedia/en/6/60/Tomorrow_Never_Dies_%281997_film%29_-_UK_cinema_poster.jpg" },
-        { title: "The World Is Not Enough", link: "player.html?title=The World Is Not Enough", img: "https://upload.wikimedia.org/wikipedia/en/c/c1/The_World_Is_Not_Enough_-_UK_cinema_poster.jpg" },
-        { title: "Die Another Day", link: "player.html?title=Die Another Day", img: "https://upload.wikimedia.org/wikipedia/en/3/39/Die_Another_Day_-_UK_cinema_poster.jpg" },
-        { title: "Casino Royale", link: "player.html?title=Casino Royale", img: "https://upload.wikimedia.org/wikipedia/en/7/7d/Casino_Royale_2_-_UK_poster.jpg" },
-        { title: "Quantum of Solace", link: "player.html?title=Quantum of Solace", img: "https://upload.wikimedia.org/wikipedia/en/0/05/Quantum_of_Solace_-_UK_cinema_poster.jpg" },
-        { title: "Skyfall", link: "player.html?title=Skyfall", img: "https://upload.wikimedia.org/wikipedia/en/a/a7/Skyfall_poster.jpg" },
-        { title: "No Time to Die", link: "player.html?title=No Time to Die", img: "https://upload.wikimedia.org/wikipedia/en/8/8f/No_Time_to_Die_poster.jpg" }
-      ];
-
-      for (const movie of movies) {
-        document.write(`
-          <div class="movie">
-            <a href="${movie.link}">
-              <img src="${movie.img}" alt="${movie.title}">
-              <div class="movie-title">${movie.title}</div>
-            </a>
-          </div>
-        `);
-      }
-    </script>
-    <!-- END BOND MOVIES -->
+<a class="movie" href="player.html?url=https://sxic.madrigalcajig.sbs:443/v4/ox/itaov/index-f1-v1-a1.txt">
+  <img src="https://upload.wikimedia.org/wikipedia/en/0/05/Dr._No_-_UK_cinema_poster.jpg" alt="Dr. No">
+  <div class="title">Dr. No (1962)</div>
+</a>
+<a class="movie" href="player.html?url=https://scvo.sperlinglayma.sbs:443/v4/xq/bnb5s/index-f2-v1-a1.txt">
+  <img src="https://upload.wikimedia.org/wikipedia/en/e/e1/From_Russia_with_Love_poster.jpg" alt="From Russia with Love">
+  <div class="title">From Russia with Love (1963)</div>
+</a>
+<a class="movie" href="player.html?url=https://sr81.griseldakro.sbs:443/v4/xq/vluy1/index-f2-v1-a1.txt">
+  <img src="https://upload.wikimedia.org/wikipedia/en/3/34/Goldfinger_(1964_film)_poster.jpg" alt="Goldfinger">
+  <div class="title">Goldfinger (1964)</div>
+</a>
+<a class="movie" href="player.html?url=https://acu5tifykrnh.cdn-centaurus.com/hls2/01/03632/qdhjo0tjjkxt_n/master.m3u8?...">
+  <img src="https://upload.wikimedia.org/wikipedia/en/a/ad/Thunderball_-_UK_cinema_poster.jpg" alt="Thunderball">
+  <div class="title">Thunderball (1965)</div>
+</a>
+<a class="movie" href="player.html?url=https://lu1r85hg8m.cdn-centaurus.com/hls2/01/03827/pmwas2v2vma0_n/master.m3u8?...">
+  <img src="https://upload.wikimedia.org/wikipedia/en/2/2d/You_Only_Live_Twice_-_UK_cinema_poster.jpg" alt="You Only Live Twice">
+  <div class="title">You Only Live Twice (1967)</div>
+</a>
+<a class="movie" href="player.html?url=https://p2qxmiasglj.cdn-centaurus.com:443/hls2/01/08488/6nekr36wy0q7_,l,n,h,.urlset/index-f3-v1-a1.m3u8?...">
+  <img src="https://upload.wikimedia.org/wikipedia/en/b/b4/On_Her_Majesty%27s_Secret_Service_-_UK_cinema_poster.jpg" alt="OHMSS">
+  <div class="title">OHMSS (1969)</div>
+</a>
+<a class="movie" href="player.html?url=https://vwyn3lxe5fv5.cdn-centaurus.com/hls2/01/00508/aurszn0kpooo_h/master.m3u8?...">
+  <img src="https://upload.wikimedia.org/wikipedia/en/e/e6/Diamonds_Are_Forever_-_UK_cinema_poster.jpg" alt="Diamonds Are Forever">
+  <div class="title">Diamonds Are Forever (1971)</div>
+</a>
+<a class="movie" href="player.html?url=https://s3ae.shahcanna.sbs/v4/ox/vssl9/cf-master.txt?v=1734145381">
+  <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Live_and_Let_Die-_UK_poster.jpg" alt="Live and Let Die">
+  <div class="title">Live and Let Die (1973)</div>
+</a>
+<a class="movie" href="player.html?url=https://g9hb6ahmf6ejy.cdn-centaurus.com/hls2/01/04215/g7025unsinyz_,n,h,.urlset/master.m3u8?...">
+  <img src="https://upload.wikimedia.org/wikipedia/en/4/4e/The_Man_with_the_Golden_Gun_-_UK_cinema_poster.jpg" alt="The Man with the Golden Gun">
+  <div class="title">Golden Gun (1974)</div>
+</a>
+<a class="movie" href="player.html?url=https://JdeVcHPXBGC6.cdn-centaurus.com/hls2/01/03845/cl01ghdyenul_n/master.m3u8?...">
+  <img src="https://upload.wikimedia.org/wikipedia/en/5/5c/The_Spy_Who_Loved_Me_(UK_cinema_poster).jpg" alt="The Spy Who Loved Me">
+  <div class="title">Spy Who Loved Me (1977)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/2/2c/Moonraker_%28UK_cinema_poster%29.jpg" alt="Moonraker">
+  <div class="title">Moonraker (1979)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/5/5d/For_Your_Eyes_Only_-_UK_cinema_poster.jpg" alt="For Your Eyes Only">
+  <div class="title">For Your Eyes Only (1981)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/2/28/Octopussy_-_UK_cinema_poster.jpg" alt="Octopussy">
+  <div class="title">Octopussy (1983)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/3/38/A_View_to_a_Kill_-_UK_cinema_poster.jpg" alt="A View to a Kill">
+  <div class="title">View to a Kill (1985)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/7/70/The_Living_Daylights_-_UK_cinema_poster.jpg" alt="The Living Daylights">
+  <div class="title">Living Daylights (1987)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/9/98/Licence_to_Kill_-_UK_cinema_poster.jpg" alt="Licence to Kill">
+  <div class="title">Licence to Kill (1989)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/b/b0/GoldenEye_-_UK_poster.jpg" alt="GoldenEye">
+  <div class="title">GoldenEye (1995)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/f/fd/Tomorrow_Never_Dies_poster.jpg" alt="Tomorrow Never Dies">
+  <div class="title">Tomorrow Never Dies (1997)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/7/7c/The_World_Is_Not_Enough_-_UK_cinema_poster.jpg" alt="The World Is Not Enough">
+  <div class="title">World Is Not Enough (1999)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/a/af/Die_Another_Day_-_UK_poster.jpg" alt="Die Another Day">
+  <div class="title">Die Another Day (2002)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/5/5e/Casino_Royale_2_-_UK_poster.jpg" alt="Casino Royale">
+  <div class="title">Casino Royale (2006)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/9/9c/Quantum_of_Solace_-_UK_poster.jpg" alt="Quantum of Solace">
+  <div class="title">Quantum of Solace (2008)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/a/a7/Skyfall_poster.jpg" alt="Skyfall">
+  <div class="title">Skyfall (2012)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/c/c3/Spectre_poster.jpg" alt="Spectre">
+  <div class="title">Spectre (2015)</div>
+</a>
+<a class="movie" href="player.html?url=LINK_HERE">
+  <img src="https://upload.wikimedia.org/wikipedia/en/7/70/No_Time_to_Die_poster.jpg" alt="No Time to Die">
+  <div class="title">No Time to Die (2021)</div>
+</a>
   </div>
 </body>
 </html>
