@@ -2,134 +2,642 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>007</title>
+  <title>007 Cinematic Universe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+    
+    :root {
+      --gold: #FFD700;
+      --dark-gold: #D4AF37;
+      --black: #0A0A0A;
+      --dark-gray: #1A1A1A;
+      --light-gray: #E5E5E5;
+    }
+    
     body {
-      background: black;
-      color: #ffcc00;
-      font-family: Arial, sans-serif;
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--black);
+      color: var(--light-gray);
       margin: 0;
-      padding: 20px;
-      text-align: center;
+      padding: 0;
+      min-height: 100vh;
     }
-    h1 {
-      margin-bottom: 20px;
-      font-size: 2em;
+    
+    .scrollbar::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
     }
-    .movies {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-    .movie {
-      background: #222;
-      border: 2px solid #ffcc00;
-      border-radius: 12px;
-      width: 200px;
-      padding: 10px;
-      cursor: pointer;
-      transition: transform 0.3s;
-    }
-    .movie:hover {
-      transform: scale(1.05);
-      background: #333;
-    }
-    .movie img {
-      width: 100%;
-      height: 280px;
-      object-fit: cover;
+    
+    .scrollbar::-webkit-scrollbar-track {
+      background: var(--dark-gray);
       border-radius: 10px;
     }
-    .movie-title {
-      margin-top: 10px;
-      font-size: 1em;
-      font-weight: bold;
+    
+    .scrollbar::-webkit-scrollbar-thumb {
+      background: var(--dark-gold);
+      border-radius: 10px;
     }
-  
-    @media (max-width: 600px) {
-      .movies {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-      }
-      .movie {
+    
+    .scrollbar::-webkit-scrollbar-thumb:hover {
+      background: var(--gold);
+    }
+    
+    .movie-card {
+      transition: all 0.3s ease;
+      transform-style: preserve-3d;
+    }
+    
+    .movie-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+    }
+    
+    .movie-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%);
+      border-radius: 0.75rem;
+      z-index: 1;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(90deg, var(--gold), var(--dark-gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .player-overlay {
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.9) 100%);
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--dark-gold), var(--gold));
+    }
+    
+    @media (max-width: 640px) {
+      .movie-card {
         width: 100%;
-        box-sizing: border-box;
-      }
-      .movie img {
-        height: auto;
       }
     }
-
   </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-black to-gray-900 py-6 px-4 shadow-lg border-b border-yellow-600">
+    <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+      <div class="flex items-center mb-4 md:mb-0">
+        <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-gun text-black text-xl"></i>
+        </div>
+        <h1 class="text-3xl font-bold gradient-text">007 Cinematic Universe</h1>
+      </div>
+      
+      <div class="relative w-full md:w-1/3">
+        <input 
+          id="searchBar" 
+          type="text" 
+          placeholder="Search James Bond movies..." 
+          class="w-full bg-gray-800 text-white px-4 py-2 rounded-full border border-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent placeholder-gray-400"
+        >
+        <i class="fas fa-search absolute right-3 top-2.5 text-yellow-500"></i>
+      </div>
+    </div>
+  </header>
 
-<h1>🚨 007 Cinematic Universe</h1>
-<input id="searchBar" placeholder="Search James Bond movies..." style="width: calc(100% - 40px);max-width: 100%;margin: 20px auto;padding: 10px 15px;font-size: 1em;border-radius: 8px;border: 2px solid #ffcc00;background: #111;color: #ffcc00;box-shadow: 0 0 10px #ffcc00a0;display: block;" type="text"/>
-<div class="movies" id="movies"></div>
-<script>
-const movies = [
-  { title: "Dr. No", video: "https://sxic.madrigalcajig.sbs:443/v4/ox/itaov/index-f1-v1-a1.txt", image: "https://alternativemovieposters.com/wp-content/uploads/2023/06/Ash-Weaver_DRNO.jpg" },
-  { title: "From Russia with Love", video: "https://scvo.sperlinglayma.sbs:443/v4/xq/bnb5s/index-f2-v1-a1.txt", image: "https://m.media-amazon.com/images/I/71M+yet93tL.jpg" },
-  { title: "Goldfinger", video: "https://sr81.griseldakro.sbs:443/v4/xq/vluy1/index-f2-v1-a1.txt", image: "https://i.etsystatic.com/14140434/r/il/f4e478/1486444070/il_fullxfull.1486444070_20a2.jpg" },
-  { title: "Thunderball", video: "https://cdn-1.celestialodyssey.site/video-stream/a9803878/playlist.m3u8", image: "https://posterspy.com/wp-content/uploads/2023/06/TB_WEB_TEMPLATE_1000x1500px.jpg" },
-  { title: "You Only Live Twice", video: "https://cdn-1.celestialodyssey.site/video-stream/55cf4cf7/playlist.m3u8", image: "https://goauctionomega.blob.core.windows.net/stock/35781-1-medium.jpg?v=63826656829657" },
-  { title: "On Her Majesty's Secret Service", video: "https://cdn-1.celestialodyssey.site/video-stream/dc5f07a0/playlist.m3u8", image: "https://media-cache.cinematerial.com/p/500x/ztunectl/on-her-majestys-secret-service-movie-poster.jpg?v=1456639344" },
-  { title: "Diamonds Are Forever", video: "https://cdn-1.celestialodyssey.site/video-stream/fbca131b/playlist.m3u8", image: "https://posterspy.com/wp-content/uploads/2023/06/DAF_WEB_TEMPLATE_1000x1500px.jpg" },
-  { title: "Live and Let Die", video: "https://cdn-1.celestialodyssey.site/video-stream/4372f73a/playlist.m3u8", image: "https://alternativemovieposters.com/wp-content/uploads/2022/12/Robert-Watts_LiveLetDie.jpg" },
-  { title: "The Man with the Golden Gun", video: "https://cdn-1.celestialodyssey.site/video-stream/d44801f0/playlist.m3u8", image: "https://image.tmdb.org/t/p/original/itH4xI6TbJtJSqcZ43B3MkpL1gy.jpg" },
-  { title: "The Spy Who Loved Me", video: "https://cdn-1.celestialodyssey.site/video-stream/cee76b74/playlist.m3u8", image: "https://posterspy.com/wp-content/uploads/2022/11/tswlm-poster.jpg" },
-  { title: "Moonraker", video: "https://cdn-1.celestialodyssey.site/video-stream/61ec181f/playlist.m3u8", image: "https://image.tmdb.org/t/p/original/uYLS9uMZmP6iXAh0jhWUZI2Nk3e.jpg" },
-  { title: "For Your Eyes Only", video: "https://cdn-1.celestialodyssey.site/video-stream/ebd9fd6c/playlist.m3u8", image: "https://i.pinimg.com/736x/9e/16/41/9e1641d6057cfae2e77879866f54a8a3.jpg" },
-  { title: "Octopussy", video: "https://cdn-1.celestialodyssey.site/video-stream/4dbe366b/playlist.m3u8", image: "https://cdn.posteritati.com/posters/000/000/061/237/octopussy-md-web.jpg" },  
-  { title: "A View to a Kill", video: "https://cdn-1.celestialodyssey.site/video-stream/3b6df79c/playlist.m3u8", image: "https://i.pinimg.com/736x/cb/36/82/cb3682872fc7b9042b505e884f5e5d54.jpg" },
-  { title: "The Living Daylights", video: "https://cdn-1.celestialodyssey.site/video-stream/2748ce73/playlist.m3u8", image: "https://posterspy.com/wp-content/uploads/2023/06/TLD_WEB_TEMPLATE_1000x1500px.jpg" },
-  { title: "Licence to Kill", video: "https://cdn-1.celestialodyssey.site/video-stream/25b11d96/playlist.m3u8", image: "https://i.pinimg.com/736x/d8/45/27/d84527d6f1c4cba168b690a59454bf36.jpg" },
-  { title: "GoldenEye", video: "https://s3ae.killionorellanacoelho.sbs/v4/61/56psf/index-f1-v1-a1.txt", image: "https://i.pinimg.com/736x/96/0e/f3/960ef3339761fc03969d9e37ec60d2d5.jpg" },
-  { title: "Tomorrow Never Dies", video: "https://cdn-1.celestialodyssey.site/video-stream/8e0794fc/playlist.m3u8", image: "https://cdn11.bigcommerce.com/s-yzgoj/images/stencil/1280x1280/products/3234392/6220705/GBEFPO431__06020.1709712291.jpg?c=2" },
-  { title: "The World Is Not Enough", video: "https://cdn-1.celestialodyssey.site/video-stream/60b66510/playlist.m3u8", image: "https://i.pinimg.com/474x/a5/fc/8f/a5fc8fa3feb3ea9f3f6316cb8c01e9b6.jpg" },
-  { title: "Die Another Day", video: "https://cdn-1.celestialodyssey.site/video-stream/431bb15c/playlist.m3u8", image: "https://cdn11.bigcommerce.com/s-yzgoj/images/stencil/500x659/products/2911891/5955577/MOVAJ0534__87882.1679599595.jpg?c=2" },
-  { title: "Casino Royale", video: "https://cdn-1.celestialodyssey.site/video-stream/32000510/playlist.m3u8", image: "https://i.redd.it/6tkj6vkehct81.jpg" },
-  { title: "Quantum of Solace", video: "https://s3ae.alenapark.sbs:443/v4/ox/xqia6/index-f2-v1-a1.txt", image: "https://artofthemovies.co.uk/cdn/shop/files/IMG_4340_300x300.jpg?v=1697040084" },
-  { title: "Skyfall", video: "https://cdn-1.celestialodyssey.site/video-stream/e606a393/playlist.m3u8", image: "https://i.pinimg.com/736x/d2/b2/ff/d2b2ffa2fb20976ae211f1d473128d2c.jpg" },
-  { title: "No Time to Die", video: "https://cdn-1.celestialodyssey.site/video-stream/0be4437c/playlist.m3u8", image: "https://preview.redd.it/4a8rd5658g161.jpg?width=640&crop=smart&auto=webp&s=8c16f3cd4b0a985f791de5507f7d2b1c411eda02" },
-];
+  <!-- Main Content -->
+  <main class="flex-grow container mx-auto px-4 py-8">
+    <!-- Featured Movie (Visible on larger screens) -->
+    <div class="hidden lg:block mb-12">
+      <div class="relative rounded-xl overflow-hidden h-96">
+        <div class="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black z-10"></div>
+        <img 
+          src="https://www.007.com/wp-content/uploads/2020/10/NTBD_1SHT_Online_v5_RGB-scaled.jpg" 
+          alt="No Time To Die" 
+          class="w-full h-full object-cover"
+        >
+        <div class="absolute bottom-0 left-0 z-20 p-8 w-full">
+          <h2 class="text-4xl font-bold text-white mb-2">No Time To Die</h2>
+          <p class="text-gray-300 mb-4 max-w-2xl">Bond has left active service and is enjoying a tranquil life in Jamaica. His peace is short-lived when his old friend Felix Leiter from the CIA turns up asking for help.</p>
+          <button class="bg-yellow-600 hover:bg-yellow-700 text-black font-bold py-2 px-6 rounded-full flex items-center transition duration-300">
+            <i class="fas fa-play mr-2"></i> Watch Now
+          </button>
+        </div>
+      </div>
+    </div>
 
-const container = document.getElementById('movies');
-movies.forEach((movie, index) => {
-  const div = document.createElement('div');
-  div.className = 'movie';
-  div.innerHTML = `
-    <img src="${movie.image}" alt="${movie.title}">
-    <div class="movie-title">${movie.title}</div>
-  `;
-  div.onclick = () => {
-    const url = `player.html?title=${encodeURIComponent(movie.title)}&video=${encodeURIComponent(movie.video)}&index=${index}`;
-    window.location.href = url;
-  };
-  container.appendChild(div);
-});
-// Live Search Filter
+    <!-- Movie Grid -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+        <span class="gradient-text">The Complete Collection</span>
+        <span class="ml-auto text-sm text-gray-400">23 Movies</span>
+      </h2>
+      
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 scrollbar overflow-y-auto max-h-screen pb-20">
+        <!-- Movie cards will be inserted here by JavaScript -->
+      </div>
+    </div>
+  </main>
 
-document.getElementById('searchBar').addEventListener('input', function () {
+  <!-- Player Modal (hidden by default) -->
+  <div id="playerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-90">
+    <div class="relative w-full h-full max-w-6xl mx-auto flex flex-col">
+      <!-- Close Button -->
+      <button id="closePlayer" class="absolute top-4 right-4 z-50 text-white hover:text-yellow-500 text-2xl">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <!-- Player Container -->
+      <div class="flex-grow relative">
+        <video id="moviePlayer" class="w-full h-full object-contain" controls></video>
+        
+        <!-- Custom Controls -->
+        <div class="player-overlay absolute bottom-0 left-0 right-0 p-4 flex flex-col z-40">
+          <div class="progress-bar w-full mb-2">
+            <div id="progressBarFill" class="progress-bar-fill w-0"></div>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <button id="playPauseBtn" class="text-white hover:text-yellow-500 text-xl">
+                <i class="fas fa-play"></i>
+              </button>
+              <span id="currentTime" class="text-white text-sm">0:00</span>
+              <span class="text-gray-400 text-sm">/</span>
+              <span id="duration" class="text-gray-400 text-sm">0:00</span>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+              <button id="muteBtn" class="text-white hover:text-yellow-500">
+                <i class="fas fa-volume-up"></i>
+              </button>
+              <input 
+                id="volumeSlider" 
+                type="range" 
+                min="0" 
+                max="1" 
+                step="0.01" 
+                value="1" 
+                class="w-20 accent-yellow-500"
+              >
+              <button id="fullscreenBtn" class="text-white hover:text-yellow-500">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Movie Info -->
+      <div id="playerInfo" class="bg-gray-900 p-4 text-white">
+        <h3 id="playerTitle" class="text-xl font-bold mb-1"></h3>
+        <div class="flex items-center text-sm text-gray-400">
+          <span id="playerYear" class="mr-4"></span>
+          <span id="playerRating" class="flex items-center">
+            <i class="fas fa-star text-yellow-500 mr-1"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  const searchTerm = this.value.toLowerCase();
+  <!-- Footer -->
+  <footer class="bg-gray-900 border-t border-gray-800 py-6 px-4">
+    <div class="container mx-auto">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <p class="text-gray-400">&copy; 2023 007 Cinematic Universe. All rights reserved.</p>
+        </div>
+        <div class="flex space-x-4">
+          <a href="#" class="text-gray-400 hover:text-yellow-500 transition duration-300">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-yellow-500 transition duration-300">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-yellow-500 transition duration-300">
+            <i class="fab fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-  const movieDivs = document.querySelectorAll('.movie');
+  <script>
+    const movies = [
+      { 
+        title: "Dr. No", 
+        year: 1962,
+        rating: 7.3,
+        video: "https://sxic.madrigalcajig.sbs:443/v4/ox/itaov/index-f1-v1-a1.txt", 
+        image: "https://alternativemovieposters.com/wp-content/uploads/2023/06/Ash-Weaver_DRNO.jpg",
+        description: "James Bond's investigation of a missing colleague in Jamaica leads him to the mysterious Dr. No, a scientific genius bent on destroying the U.S. space program."
+      },
+      { 
+        title: "From Russia with Love", 
+        year: 1963,
+        rating: 7.4,
+        video: "https://scvo.sperlinglayma.sbs:443/v4/xq/bnb5s/index-f2-v1-a1.txt", 
+        image: "https://m.media-amazon.com/images/I/71M+yet93tL.jpg",
+        description: "James Bond willingly falls into an assassination plot involving a Russian defector in order to retrieve a Soviet encryption device."
+      },
+      { 
+        title: "Goldfinger", 
+        year: 1964,
+        rating: 7.7,
+        video: "https://sr81.griseldakro.sbs:443/v4/xq/vluy1/index-f2-v1-a1.txt", 
+        image: "https://i.etsystatic.com/14140434/r/il/f4e478/1486444070/il_fullxfull.1486444070_20a2.jpg",
+        description: "Investigating a gold magnate's smuggling, James Bond uncovers a plot to contaminate the Fort Knox gold reserve."
+      },
+      { 
+        title: "Thunderball", 
+        year: 1965,
+        rating: 7.0,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/a9803878/playlist.m3u8", 
+        image: "https://posterspy.com/wp-content/uploads/2023/06/TB_WEB_TEMPLATE_1000x1500px.jpg",
+        description: "James Bond heads to the Bahamas to recover two nuclear warheads stolen by SPECTRE agent Emilio Largo in an international extortion scheme."
+      },
+      { 
+        title: "You Only Live Twice", 
+        year: 1967,
+        rating: 6.8,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/55cf4cf7/playlist.m3u8", 
+        image: "https://goauctionomega.blob.core.windows.net/stock/35781-1-medium.jpg?v=63826656829657",
+        description: "Agent 007 and the Japanese secret service ninja force must find and stop the true culprit of a series of spacejackings before nuclear war is provoked."
+      },
+      { 
+        title: "On Her Majesty's Secret Service", 
+        year: 1969,
+        rating: 6.7,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/dc5f07a0/playlist.m3u8", 
+        image: "https://media-cache.cinematerial.com/p/500x/ztunectl/on-her-majestys-secret-service-movie-poster.jpg?v=1456639344",
+        description: "James Bond woos a mob boss's daughter and goes undercover to uncover the true reason for Blofeld's allergy research in the Swiss Alps."
+      },
+      { 
+        title: "Diamonds Are Forever", 
+        year: 1971,
+        rating: 6.5,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/fbca131b/playlist.m3u8", 
+        image: "https://posterspy.com/wp-content/uploads/2023/06/DAF_WEB_TEMPLATE_1000x1500px.jpg",
+        description: "A diamond smuggling investigation leads James Bond to Las Vegas, where he uncovers an evil plot involving a rich business tycoon."
+      },
+      { 
+        title: "Live and Let Die", 
+        year: 1973,
+        rating: 6.7,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/4372f73a/playlist.m3u8", 
+        image: "https://alternativemovieposters.com/wp-content/uploads/2022/12/Robert-Watts_LiveLetDie.jpg",
+        description: "007 is sent to stop a diabolically brilliant heroin magnate armed with a complex organization and a reliable psychic tarot card reader."
+      },
+      { 
+        title: "The Man with the Golden Gun", 
+        year: 1974,
+        rating: 6.7,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/d44801f0/playlist.m3u8", 
+        image: "https://image.tmdb.org/t/p/original/itH4xI6TbJtJSqcZ43B3MkpL1gy.jpg",
+        description: "James Bond is led to believe that he is targeted by the world's most expensive assassin while he attempts to recover sensitive solar cell technology."
+      },
+      { 
+        title: "The Spy Who Loved Me", 
+        year: 1977,
+        rating: 7.1,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/cee76b74/playlist.m3u8", 
+        image: "https://posterspy.com/wp-content/uploads/2022/11/tswlm-poster.jpg",
+        description: "James Bond investigates the hijacking of British and Russian submarines carrying nuclear warheads with the help of a KGB agent."
+      },
+      { 
+        title: "Moonraker", 
+        year: 1979,
+        rating: 6.3,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/61ec181f/playlist.m3u8", 
+        image: "https://image.tmdb.org/t/p/original/uYLS9uMZmP6iXAh0jhWUZI2Nk3e.jpg",
+        description: "James Bond investigates the mid-air theft of a space shuttle and discovers a plot to commit global genocide."
+      },
+      { 
+        title: "For Your Eyes Only", 
+        year: 1981,
+        rating: 6.8,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/ebd9fd6c/playlist.m3u8", 
+        image: "https://i.pinimg.com/736x/9e/16/41/9e1641d6057cfae2e77879866f54a8a3.jpg",
+        description: "Agent 007 is assigned to hunt for a lost British encryption device and prevent it from falling into enemy hands."
+      },
+      { 
+        title: "Octopussy", 
+        year: 1983,
+        rating: 6.5,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/4dbe366b/playlist.m3u8", 
+        image: "https://cdn.posteritati.com/posters/000/000/061/237/octopussy-md-web.jpg",
+        description: "A fake Fabergé egg and a fellow agent's death lead James Bond to uncover an international jewel-smuggling operation."
+      },  
+      { 
+        title: "A View to a Kill", 
+        year: 1985,
+        rating: 6.3,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/3b6df79c/playlist.m3u8", 
+        image: "https://i.pinimg.com/736x/cb/36/82/cb3682872fc7b9042b505e884f5e5d54.jpg",
+        description: "An investigation of a horse-racing scam leads James Bond to a mad industrialist who plans to create a worldwide microchip monopoly by destroying California's Silicon Valley."
+      },
+      { 
+        title: "The Living Daylights", 
+        year: 1987,
+        rating: 6.7,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/2748ce73/playlist.m3u8", 
+        image: "https://posterspy.com/wp-content/uploads/2023/06/TLD_WEB_TEMPLATE_1000x1500px.jpg",
+        description: "James Bond is sent to investigate a KGB policy to kill all enemy spies and uncovers an arms deal that could have major ramifications."
+      },
+      { 
+        title: "Licence to Kill", 
+        year: 1989,
+        rating: 6.5,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/25b11d96/playlist.m3u8", 
+        image: "https://i.pinimg.com/736x/d8/45/27/d84527d6f1c4cba168b690a59454bf36.jpg",
+        description: "James Bond goes rogue to avenge the attack on Felix Leiter and the death of his wife, taking on a drug lord in a deadly campaign."
+      },
+      { 
+        title: "GoldenEye", 
+        year: 1995,
+        rating: 7.2,
+        video: "https://s3ae.killionorellanacoelho.sbs/v4/61/56psf/index-f1-v1-a1.txt", 
+        image: "https://i.pinimg.com/736x/96/0e/f3/960ef3339761fc03969d9e37ec60d2d5.jpg",
+        description: "James Bond teams up with the lone survivor of a destroyed Russian research center to stop the hijacking of a nuclear space weapon."
+      },
+      { 
+        title: "Tomorrow Never Dies", 
+        year: 1997,
+        rating: 6.5,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/8e0794fc/playlist.m3u8", 
+        image: "https://cdn11.bigcommerce.com/s-yzgoj/images/stencil/1280x1280/products/3234392/6220705/GBEFPO431__06020.1709712291.jpg?c=2",
+        description: "James Bond heads to stop a media mogul's plan to induce war between China and the UK in order to obtain exclusive global media coverage."
+      },
+      { 
+        title: "The World Is Not Enough", 
+        year: 1999,
+        rating: 6.4,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/60b66510/playlist.m3u8", 
+        image: "https://i.pinimg.com/474x/a5/fc/8f/a5fc8fa3feb3ea9f3f6316cb8c01e9b6.jpg",
+        description: "James Bond uncovers a nuclear plot when he protects an oil heiress from her former kidnapper, an international terrorist who can't feel pain."
+      },
+      { 
+        title: "Die Another Day", 
+        year: 2002,
+        rating: 6.1,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/431bb15c/playlist.m3u8", 
+        image: "https://cdn11.bigcommerce.com/s-yzgoj/images/stencil/500x659/products/2911891/5955577/MOVAJ0534__87882.1679599595.jpg?c=2",
+        description: "James Bond is sent to investigate the connection between a North Korean terrorist and a diamond mogul who is funding the development of an international space weapon."
+      },
+      { 
+        title: "Casino Royale", 
+        year: 2006,
+        rating: 8.0,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/32000510/playlist.m3u8", 
+        image: "https://i.redd.it/6tkj6vkehct81.jpg",
+        description: "After earning 00 status and a licence to kill, James Bond sets out on his first mission as 007, which leads him to Le Chiffre, a banker to the world's terrorists."
+      },
+      { 
+        title: "Quantum of Solace", 
+        year: 2008,
+        rating: 6.6,
+        video: "https://s3ae.alenapark.sbs:443/v4/ox/xqia6/index-f2-v1-a1.txt", 
+        image: "https://artofthemovies.co.uk/cdn/shop/files/IMG_4340_300x300.jpg?v=1697040084",
+        description: "James Bond descends into mystery as he tries to stop a mysterious organization from eliminating a country's most valuable resource."
+      },
+      { 
+        title: "Skyfall", 
+        year: 2012,
+        rating: 7.8,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/e606a393/playlist.m3u8", 
+        image: "https://i.pinimg.com/736x/d2/b2/ff/d2b2ffa2fb20976ae211f1d473128d2c.jpg",
+        description: "James Bond's loyalty to M is tested when her past comes back to haunt her. When MI6 comes under attack, 007 must track down and destroy the threat."
+      },
+      { 
+        title: "No Time to Die", 
+        year: 2021,
+        rating: 7.3,
+        video: "https://cdn-1.celestialodyssey.site/video-stream/0be4437c/playlist.m3u8", 
+        image: "https://preview.redd.it/4a8rd5658g161.jpg?width=640&crop=smart&auto=webp&s=8c16f3cd4b0a985f791de5507f7d2b1c411eda02",
+        description: "Bond has left active service and is enjoying a tranquil life in Jamaica. His peace is short-lived when his old friend Felix Leiter from the CIA turns up asking for help."
+      }
+    ];
 
-  movieDivs.forEach(div => {
+    // DOM Elements
+    const container = document.querySelector('.grid');
+    const searchBar = document.getElementById('searchBar');
+    const playerModal = document.getElementById('playerModal');
+    const moviePlayer = document.getElementById('moviePlayer');
+    const closePlayer = document.getElementById('closePlayer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const muteBtn = document.getElementById('muteBtn');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const currentTime = document.getElementById('currentTime');
+    const duration = document.getElementById('duration');
+    const playerTitle = document.getElementById('playerTitle');
+    const playerYear = document.getElementById('playerYear');
+    const playerRating = document.getElementById('playerRating');
 
-    const title = div.querySelector('.movie-title').textContent.toLowerCase();
+    // Render Movies
+    function renderMovies(moviesToRender) {
+      container.innerHTML = '';
+      moviesToRender.forEach((movie, index) => {
+        const movieCard = document.createElement('div');
+        movieCard.className = 'movie-card relative rounded-xl overflow-hidden cursor-pointer group';
+        movieCard.innerHTML = `
+          <img src="${movie.image}" alt="${movie.title}" class="w-full h-full object-cover transition duration-300 group-hover:opacity-70">
+          <div class="absolute bottom-0 left-0 right-0 z-10 p-4">
+            <h3 class="text-white font-bold text-lg">${movie.title}</h3>
+            <div class="flex items-center text-sm text-gray-300">
+              <span>${movie.year}</span>
+              <span class="mx-2">•</span>
+              <span class="flex items-center">
+                <i class="fas fa-star text-yellow-500 mr-1"></i>
+                ${movie.rating.toFixed(1)}
+              </span>
+            </div>
+          </div>
+          <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 z-20">
+            <button class="bg-yellow-600 hover:bg-yellow-700 text-black font-bold py-2 px-4 rounded-full flex items-center">
+              <i class="fas fa-play mr-2"></i> Play
+            </button>
+          </div>
+        `;
+        movieCard.addEventListener('click', () => openPlayer(movie, index));
+        container.appendChild(movieCard);
+      });
+    }
 
-    div.style.display = title.includes(searchTerm) ? 'block' : 'none';
+    // Open Player
+    function openPlayer(movie, index) {
+      playerTitle.textContent = movie.title;
+      playerYear.textContent = movie.year;
+      playerRating.innerHTML = `${movie.rating.toFixed(1)}/10`;
+      
+      moviePlayer.src = movie.video;
+      playerModal.classList.remove('hidden');
+      moviePlayer.play();
+      
+      // Update play/pause button
+      playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+      
+      // Set focus for keyboard controls
+      moviePlayer.focus();
+    }
 
-  });
+    // Close Player
+    function closePlayerModal() {
+      playerModal.classList.add('hidden');
+      moviePlayer.pause();
+      moviePlayer.src = '';
+    }
 
-});    
-</script>
+    // Format time (seconds to MM:SS)
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+      return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    }
 
+    // Event Listeners
+    closePlayer.addEventListener('click', closePlayerModal);
+    
+    // Play/Pause toggle
+    playPauseBtn.addEventListener('click', () => {
+      if (moviePlayer.paused) {
+        moviePlayer.play();
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+      } else {
+        moviePlayer.pause();
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+      }
+    });
+    
+    // Mute toggle
+    muteBtn.addEventListener('click', () => {
+      moviePlayer.muted = !moviePlayer.muted;
+      muteBtn.innerHTML = moviePlayer.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+    });
+    
+    // Volume slider
+    volumeSlider.addEventListener('input', () => {
+      moviePlayer.volume = volumeSlider.value;
+      moviePlayer.muted = volumeSlider.value === '0';
+      muteBtn.innerHTML = moviePlayer.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+    });
+    
+    // Fullscreen toggle
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        playerModal.requestFullscreen().catch(err => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    });
+    
+    // Update progress bar and time
+    moviePlayer.addEventListener('timeupdate', () => {
+      const progress = (moviePlayer.currentTime / moviePlayer.duration) * 100;
+      progressBarFill.style.width = `${progress}%`;
+      currentTime.textContent = formatTime(moviePlayer.currentTime);
+      
+      if (!isNaN(moviePlayer.duration)) {
+        duration.textContent = formatTime(moviePlayer.duration);
+      }
+    });
+    
+    // Click on progress bar to seek
+    progressBarFill.parentElement.addEventListener('click', (e) => {
+      const rect = e.target.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      moviePlayer.currentTime = pos * moviePlayer.duration;
+    });
+    
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (playerModal.classList.contains('hidden')) return;
+      
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          if (moviePlayer.paused) {
+            moviePlayer.play();
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          } else {
+            moviePlayer.pause();
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+          }
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          moviePlayer.currentTime = Math.max(0, moviePlayer.currentTime - 5);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          moviePlayer.currentTime = Math.min(moviePlayer.duration, moviePlayer.currentTime + 5);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          moviePlayer.volume = Math.min(1, moviePlayer.volume + 0.1);
+          volumeSlider.value = moviePlayer.volume;
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          moviePlayer.volume = Math.max(0, moviePlayer.volume - 0.1);
+          volumeSlider.value = moviePlayer.volume;
+          break;
+        case 'm':
+          e.preventDefault();
+          moviePlayer.muted = !moviePlayer.muted;
+          muteBtn.innerHTML = moviePlayer.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+          break;
+        case 'f':
+          e.preventDefault();
+          if (!document.fullscreenElement) {
+            playerModal.requestFullscreen().catch(err => {
+              console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+          } else {
+            document.exitFullscreen();
+          }
+          break;
+        case 'Escape':
+          if (document.fullscreenElement) {
+            e.preventDefault();
+            document.exitFullscreen();
+          } else {
+            closePlayerModal();
+          }
+          break;
+      }
+    });
+    
+    // Search functionality
+    searchBar.addEventListener('input', () => {
+      const searchTerm = searchBar.value.toLowerCase();
+      const filteredMovies = movies.filter(movie => 
+        movie.title.toLowerCase().includes(searchTerm) ||
+        movie.year.toString().includes(searchTerm) ||
+        movie.description.toLowerCase().includes(searchTerm)
+      );
+      renderMovies(filteredMovies);
+    });
+    
+    // Initial render
+    renderMovies(movies);
+  </script>
 </body>
 </html>
